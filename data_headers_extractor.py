@@ -62,7 +62,8 @@ def get_cbi_details(all_text):
     if exempt_string1 in all_text:
         index = merged.index(exempt_string1)
         index += 1
-        cbi = merged[index].strip("Data items and details exempt from publication include".upper())
+        cbi = merged[index].strip(
+            "Data items and details exempt from publication include".upper())
         cbi_other = merged[index+1]
         all_cbi = cbi + cbi_other
         replaced = all_cbi.replace('.', ', ')
@@ -76,7 +77,8 @@ def get_cbi_details(all_text):
     elif exempt_string2 in merged:
         index = merged.index(exempt_string2)
         index += 1
-        cbi = merged[index].strip("Data items and details exempt from publication include".upper())
+        cbi = merged[index].strip(
+            "Data items and details exempt from publication include".upper())
         cbi_other = merged[index + 1]
         all_cbi = cbi + cbi_other
         replaced = all_cbi.replace('.', ', ')
@@ -179,7 +181,8 @@ for fileItem in fileList:
 desktop = '/home/georgia/Desktop'
 os.chdir(desktop)
 
-csv_columns = ['Assessment ID', 'CAS number', 'Associated CAS numbers', 'CBI', 'CBI details', 'Chemical name']
+csv_columns = ['Assessment ID', 'CAS number',
+               'Associated CAS numbers', 'CBI', 'CBI details', 'Chemical name']
 csv_file = 'report_data.csv'
 
 try:
