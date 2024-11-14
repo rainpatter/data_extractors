@@ -1,0 +1,79 @@
+I'll begin by loading both files and performing an initial comparison based on the columns you specified, particularly focusing on the 'End use' and 'File name/Assessment ID' columns. After identifying the similarities and differences in these areas, I'll create a detailed breakdown and share a reusable script for future comparisons.
+
+Let’s start with the analysis.
+
+It appears that one or both of the CSV files contain non-UTF-8 encoded characters, causing an error while loading. I’ll attempt to load the files using a different encoding and see if this resolves the issue.
+
+The files have successfully loaded with the ISO-8859-1 encoding. Here is a quick overview of their structures:
+
+### File 1 (`final_extracted_uses_111124.csv`):
+- **Columns:** `Assessment ID`, `Extracted use`, `Persistence Tag`, `Perfluoro Tag`
+- This file includes details on each "Assessment ID" and corresponding "Extracted use," along with additional columns `Persistence Tag` and `Perfluoro Tag`.
+
+### File 2 (`EndUseExtract (Complete) - Copy.csv`):
+- **Columns:** `ï»¿File name`, `Extracted use`
+- This file includes a "File name" column (which likely corresponds to "Assessment ID" in File 1) and "Extracted use."
+
+Next, I’ll focus on comparing the columns `Assessment ID` from File 1 and `File name` from File 2, along with `Extracted use` from both files. I’ll analyze similarities and differences in these columns and then provide a summary along with a reusable script.
+
+Here is a summary of the comparison:
+
+- **Total rows in File 1**: 4,267
+- **Total rows in File 2**: 4,302
+- **Total common IDs** (Assessment IDs/File names): 4,286
+- **Matching 'End use' entries**: 11
+- **Non-matching 'End use' entries**: 4,309
+
+This indicates that while there are 4,286 common IDs across both files, only 11 rows have identical "End use" descriptions in both files. The remaining rows (4,309) differ in their "End use" descriptions.
+
+### Observations and Recommendations:
+1. **Low Match Rate**: The large number of non-matching "End use" entries suggests differences in the descriptions of the end uses. Further investigation could clarify whether these differences are minor wording variations or substantial content differences.
+2. **Potential Cleanup**: Standardizing or normalizing the language in the "End use" descriptions (e.g., removing punctuation, lowercasing) before comparing could improve match rates if minor variations in wording are causing discrepancies.
+3. **Exploring Additional Columns**: If more columns in File 1 (like `Persistence Tag` and `Perfluoro Tag`) are relevant, adding them to the comparison might yield further insights.
+
+### Code for Reusable Comparison Script:
+Below is a Python script that can be reused for comparing two similar CSV files based on specified columns.
+
+```python
+import pandas as pd
+
+def compare_csv_files(file1_path, file2_path, id_col, compare_col):
+    # Load files with ISO-8859-1 encoding to handle special characters
+    file1_df = pd.read_csv(file1_path, encoding='ISO-8859-1')
+    file2_df = pd.read_csv(file2_path, encoding='ISO-8859-1')
+
+    # Rename columns for consistency
+    file1_df.rename(columns={id_col: 'ID', compare_col: 'End use'}, inplace=True)
+    file2_df.rename(columns={id_col: 'ID', compare_col: 'End use'}, inplace=True)
+
+    # Merge dataframes on 'ID' column
+    merged_df = pd.merge(file1_df[['ID', 'End use']], file2_df[['ID', 'End use']], on='ID', suffixes=('_file1', '_file2'), how='outer')
+
+    # Separate matching and non-matching entries
+    same_end_use = merged_df[merged_df['End use_file1'] == merged_df['End use_file2']]
+    different_end_use = merged_df[merged_df['End use_file1'] != merged_df['End use_file2']]
+
+    # Summary statistics
+    summary = {
+        "Total rows in File 1": file1_df.shape[0],
+        "Total rows in File 2": file2_df.shape[0],
+        "Total common IDs": merged_df['ID'].nunique(),
+        "Matching 'End use' entries": same_end_use.shape[0],
+        "Non-matching 'End use' entries": different_end_use.shape[0]
+    }
+
+    return summary, same_end_use, different_end_use
+
+# Example usage
+file1_path = 'path/to/final_extracted_uses_111124.csv'
+file2_path = 'path/to/EndUseExtract (Complete) - Copy.csv'
+summary, same, different = compare_csv_files(file1_path, file2_path, 'Assessment ID', 'Extracted use')
+print(summary)
+```
+
+This script will:
+1. Load and merge both files based on a specified ID and comparison column.
+2. Identify and separate rows where the "End use" columns are identical or different.
+3. Provide a summary of matching and non-matching entries for quick insights. 
+
+Let me know if you'd like further customization or exploration of these differences.
